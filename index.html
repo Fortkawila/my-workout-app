@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บันทึกการออกกำลังกาย</title>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #f4f7f6; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { color: #28a745; text-align: center; }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        select, input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; margin-top: 20px; font-size: 16px; cursor: pointer; }
+        #status { text-align: center; margin-top: 10px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>🏃 บันทึกกิจกรรม</h2>
+    <p id="userName">กำลังโหลดข้อมูล...</p>
+
+    <label>เลือกประเภทกีฬา</label>
+    <select id="type" onchange="updateUnit()">
+        <option value="เดิน">เดิน (ก้าว)</option>
+        <option value="วิ่ง">วิ่ง (กม.)</option>
+        <option value="ว่ายน้ำ">ว่ายน้ำ (เมตร)</option>
+        <option value="อื่นๆ">อื่นๆ (นาที)</option>
+    </select>
+
+    <label id="labelValue">จำนวนก้าว</label>
+    <input type="number" id="value" placeholder="ใส่ตัวเลขที่นี่">
+
+    <label>ลิงก์รูปภาพ (หรือส่งรูปผ่านแชททีหลัง)</label>
+    <input type="text" id="photoUrl" placeholder="วางลิงก์รูปภาพที่นี่">
+
+    <button onclick="sendData()">บันทึกข้อมูล</button>
+    <p id="status"></p>
+</div>
+
+<script>
+    const WEB_APP_URL = "วางURLที่ได้จากGoogleAppsScriptตรงนี้";
+
+    // เปลี่ยนหน่วยตามกีฬาที่เลือก
+    function updateUnit() {
+        const type = document.getElementById('type').value;
+        const label = document.getElementById('labelValue');
+        if(type === "เดิน") label.innerText = "จำนวนก้าว";
+        else if(type === "วิ่ง") label.innerText = "ระยะทาง (กม.)";
+        else if(type === "ว่ายน้ำ") label.innerText = "ระยะทาง (เมตร)";
+        else label.innerText = "เวลา (นาที)";
+    }
+
+    async function main() {
+        await liff.init({ liffId: "วางLIFF_IDของคุณตรงนี้" });
+        if (liff.isLoggedIn()) {
+            const profile = await liff.getProfile();
+            document.getElementById('userName').innerText = "สวัสดีคุณ " + profile.displayName;
+        } else {
+            liff.login();
+        }
+    }
+
+    async function sendData() {
+        const profile = await liff.getProfile();
+        const data = {
+            userId: profile.userId,
+            userName: profile.displayName,
+            type: document.getElementById('type').value,
+            value: document.getElementById('value').value,
+            photoUrl: document.getElementById('photoUrl').value
+        };
+
+        document.getElementById('status').innerText = "กำลังบันทึก...";
+        
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        }).then(res => {
+            document.getElementById('status').innerText = "✅ บันทึกสำเร็จ!";
+            liff.closeWindow(); // ปิดหน้าต่าง LIFF ทันทีเมื่อเสร็จ
+        }).catch(err => {
+            document.getElementById('status').innerText = "❌ เกิดข้อผิดพลาด";
+        });
+    }
+
+    main();
+</script>
+
+</body>
+</html>
