@@ -69,32 +69,36 @@
                 reader.readAsDataURL(file);
             }
         };
-
-        async function sendData() {
+async function sendData() {
             const btn = document.getElementById('submitBtn');
             const status = document.getElementById('status');
             const val = document.getElementById('exerciseValue').value;
+            
             if (!val) { alert("กรุณาใส่ตัวเลขก่อนค่ะ"); return; }
 
             try {
                 btn.disabled = true;
-                status.innerText = "⌛ กำลังบันทึกข้อมูล...";
-                const profile = await liff.getProfile();
-const data = {
-    userId: profile.userId,
-    userName: profile.displayName,
+                status.innerText = "⌛ กำลังย่อขนาดรูปและบันทึก...";
+
+                // --- ส่วนดึงโปรไฟล์ (กลับไปใช้ชื่อ LINE จริง) ---
+                const profile = await liff.getProfile(); 
+
+                const data = {
+                    userId: profile.userId,
+                    userName: profile.displayName,
                     type: document.getElementById('exerciseType').value,
                     value: val,
-                    imageFile: base64Image
+                    imageFile: base64Image // ส่งรูปที่ถูกอ่านค่าไว้แล้ว
                 };
 
+                // ส่งข้อมูลไปยัง Apps Script
                 await fetch(scriptUrl, {
                     method: 'POST',
                     mode: 'no-cors',
                     body: JSON.stringify(data)
                 });
 
-                alert("🎉 บันทึกสำเร็จแล้วค่ะ!");
+                alert("🎉 บันทึกสำเร็จพร้อมรูปภาพแล้วค่ะ!");
                 liff.closeWindow();
             } catch (error) {
                 alert("เกิดข้อผิดพลาด: " + error.message);
