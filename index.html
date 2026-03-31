@@ -91,7 +91,9 @@
 
             const response = await fetch(WEB_APP_URL, {
                 method: 'POST',
-                mode: 'no-cors', // ใส่เพื่อแก้ปัญหาความปลอดภัยเบื้องต้น
+                headers: {
+                    'Content-Type': 'text/plain' // ทริคหลอกระบบว่าเป็น Text ธรรมดาเพื่อหลบ CORS
+                },
                 body: JSON.stringify(data)
             });
 
