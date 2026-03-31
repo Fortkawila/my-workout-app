@@ -78,18 +78,23 @@
         return resData.data.link;
     }
 
-    async function sendData() {
+   async function sendData() {
         const status = document.getElementById('status');
         const fileInput = document.getElementById('imageInput');
         
         try {
             const profile = await liff.getProfile();
-            status.innerText = "กำลังดำเนินการ... โปรดรอสักครู่";
+            status.innerText = "กำลังประมวลผล...";
             
-            let photoUrl = "";
+            let imageBase64 = null;
             if (fileInput.files.length > 0) {
-                status.innerText = "กำลังอัปโหลดรูปภาพ...";
-                photoUrl = await uploadImage(fileInput.files[0]);
+                status.innerText = "กำลังเตรียมรูปภาพ...";
+                const file = fileInput.files[0];
+                imageBase64 = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.readAsDataURL(file);
+                });
             }
 
             const data = {
@@ -97,13 +102,12 @@
                 userName: profile.displayName,
                 type: document.getElementById('type').value,
                 value: document.getElementById('value').value,
-                photoUrl: photoUrl
+                imageFile: imageBase64 
             };
 
-            status.innerText = "กำลังบันทึกข้อมูลลงตาราง...";
+            status.innerText = "กำลังบันทึกข้อมูล...";
             await fetch(WEB_APP_URL, {
                 method: 'POST',
-                mode: 'no-cors',
                 body: JSON.stringify(data)
             });
 
@@ -111,10 +115,9 @@
             setTimeout(() => liff.closeWindow(), 2000);
 
         } catch (err) {
-            status.innerText = "❌ เกิดข้อผิดพลาด: " + err;
+            status.innerText = "❌ ผิดพลาด: " + err;
         }
     }
-
     main();
 </script>
 
