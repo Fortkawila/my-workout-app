@@ -79,10 +79,10 @@
             try {
                 btn.disabled = true;
                 status.innerText = "⌛ กำลังบันทึกข้อมูล...";
-                const profile = { userId: "guest", displayName: "คุณหมอ (Manual)" };
-                const data = {
-                    userId: profile.userId,
-                    userName: profile.displayName,
+                const profile = await liff.getProfile();
+const data = {
+    userId: profile.userId,
+    userName: profile.displayName,
                     type: document.getElementById('exerciseType').value,
                     value: val,
                     imageFile: base64Image
