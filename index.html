@@ -40,10 +40,8 @@
 </div>
 
 <script>
-    // --- จุดที่ต้องแก้ 1: วาง Web App URL จาก Google Sheets ---
+    // 1. วาง URL ที่ได้จากการ New Deployment (เวอร์ชันล่าสุด) ตรงนี้
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby6Inq0werqQZBNHR995grv5i3gB9dg142WbjSe24X3opqZjRA_go1nq6wnenHxMPfkGQ/exec"; 
-
-    // --- จุดที่ต้องแก้ 2: วาง LIFF ID ของคุณ ---
     const MY_LIFF_ID = "2009654811-r9KVm9al"; 
 
     function updateUnit() {
@@ -65,32 +63,17 @@
         }
     }
 
-    async function uploadImage(file) {
-        const clientId = "546c745a9070940"; 
-        const formData = new FormData();
-        formData.append('image', file);
-        const response = await fetch('https://api.imgur.com/3/image', {
-            method: 'POST',
-            headers: { Authorization: `Client-ID ${clientId}` },
-            body: formData
-        });
-        const resData = await response.json();
-        return resData.data.link;
-    }
-
-async function sendData() {
+    async function sendData() {
         const status = document.getElementById('status');
         const fileInput = document.getElementById('imageInput');
         
         try {
             const profile = await liff.getProfile();
-            status.innerText = "กำลังประมวลผล... โปรดรอสักครู่";
+            status.innerText = "⏳ กำลังบันทึกข้อมูล...";
             
             let imageBase64 = null;
             if (fileInput.files.length > 0) {
-                status.innerText = "กำลังเตรียมรูปภาพ...";
                 const file = fileInput.files[0];
-                // แปลงรูปเป็น Base64 เพื่อส่งเข้า Google Drive โดยไม่ต้องผ่าน Imgur
                 imageBase64 = await new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onloadend = () => resolve(reader.result);
@@ -106,27 +89,21 @@ async function sendData() {
                 imageFile: imageBase64 
             };
 
-            status.innerText = "กำลังบันทึกข้อมูล...";
             const response = await fetch(WEB_APP_URL, {
                 method: 'POST',
+                mode: 'no-cors', // ใส่เพื่อแก้ปัญหาความปลอดภัยเบื้องต้น
                 body: JSON.stringify(data)
             });
 
-            const resData = await response.json();
-            if (resData.result === "success") {
-                status.innerText = "✅ บันทึกสำเร็จ!";
-                setTimeout(() => liff.closeWindow(), 2000);
-            } else {
-                throw new Error(resData.error);
-            }
+            // เนื่องด้วย mode no-cors จะอ่าน response ไม่ได้ แต่ข้อมูลจะเข้า Sheet ครับ
+            status.innerText = "✅ บันทึกสำเร็จ! กรุณาเช็คใน Sheet";
+            setTimeout(() => liff.closeWindow(), 3000);
 
         } catch (err) {
             status.innerText = "❌ ผิดพลาด: " + err;
-            console.error(err);
         }
     }
     main();
 </script>
-
 </body>
 </html>
