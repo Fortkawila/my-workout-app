@@ -13,15 +13,13 @@
 <body class="p-4">
     <div class="max-w-md mx-auto bg-white rounded-xl shadow-md p-6">
         <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">🏃 บันทึกกิจกรรม</h1>
-        
         <div id="userInfo" class="mb-6 text-center text-gray-600">
             <p id="userName" class="font-semibold text-green-600">กำลังโหลดข้อมูลโปรไฟล์...</p>
         </div>
-
         <form id="workoutForm" class="space-y-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700">เลือกประเภทกีฬา</label>
-                <select id="exerciseType" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border">
+                <select id="exerciseType" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border text-lg">
                     <option value="เดิน">เดิน (ก้าว)</option>
                     <option value="วิ่ง">วิ่ง (กม.)</option>
                     <option value="ปั่นจักรยาน">ปั่นจักรยาน (กม.)</option>
@@ -29,18 +27,15 @@
                     <option value="อื่นๆ">อื่นๆ (นาที)</option>
                 </select>
             </div>
-
             <div>
                 <label class="block text-sm font-medium text-gray-700">ระบุตัวเลข</label>
-                <input type="number" id="exerciseValue" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border" placeholder="ใส่ตัวเลขที่นี่">
+                <input type="number" id="exerciseValue" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border text-lg" placeholder="ใส่ตัวเลขที่นี่">
             </div>
-
             <div>
                 <label class="block text-sm font-medium text-gray-700">อัปโหลดรูปภาพกิจกรรม</label>
                 <input type="file" id="imageInput" accept="image/*" class="mt-1 block w-full text-sm">
             </div>
-
-            <button type="button" onclick="sendData()" id="submitBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg mt-6">
+            <button type="button" onclick="sendData()" id="submitBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-4 rounded-lg shadow-lg mt-6 text-lg">
                 บันทึกข้อมูล
             </button>
             <p id="status" class="text-center text-sm font-medium mt-2 text-gray-500"></p>
@@ -48,14 +43,11 @@
     </div>
 
     <script>
-        // 1. ตรวจสอบ URL นี้ให้ตรงกับใน Apps Script ของคุณหมอนะคะ
         const scriptUrl = "https://script.google.com/macros/s/AKfycbw3_ZaaksOAk7uIjcX8o2IOet2HZ7NioxM12tu30IbGmGNnwNyHmPpZ1be-Z-oeeHwxBg/exec"; 
-        
         let base64Image = null;
 
         async function main() {
             try {
-                // 2. ตรวจสอบ LIFF ID ของคุณหมอด้วยนะคะ
                 await liff.init({ liffId: "2009654811-r9KVm9a1" }); 
                 if (liff.isLoggedIn()) {
                     const profile = await liff.getProfile();
@@ -69,7 +61,6 @@
         }
         main();
 
-        // จัดการการพรีวิวรูป
         document.getElementById('imageInput').onchange = function(evt) {
             const file = evt.target.files[0];
             if (file) {
@@ -79,21 +70,15 @@
             }
         };
 
-        // ฟังก์ชันส่งข้อมูล
         async function sendData() {
             const btn = document.getElementById('submitBtn');
             const status = document.getElementById('status');
             const val = document.getElementById('exerciseValue').value;
-
-            if (!val) {
-                alert("กรุณาใส่ตัวเลขก่อนค่ะ");
-                return;
-            }
+            if (!val) { alert("กรุณาใส่ตัวเลขก่อนค่ะ"); return; }
 
             try {
                 btn.disabled = true;
                 status.innerText = "⌛ กำลังบันทึกข้อมูล...";
-                
                 const profile = await liff.getProfile();
                 const data = {
                     userId: profile.userId,
@@ -111,7 +96,6 @@
 
                 alert("🎉 บันทึกสำเร็จแล้วค่ะ!");
                 liff.closeWindow();
-
             } catch (error) {
                 alert("เกิดข้อผิดพลาด: " + error.message);
                 btn.disabled = false;
