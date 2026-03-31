@@ -53,7 +53,7 @@
     }
 
     async function main() {
-        await liff.init({ liffId: "วางLIFF_IDของคุณตรงนี้" });
+        await liff.init({ liffId: "2009654811-r9KVm9al" });
         if (liff.isLoggedIn()) {
             const profile = await liff.getProfile();
             document.getElementById('userName').innerText = "สวัสดีคุณ " + profile.displayName;
