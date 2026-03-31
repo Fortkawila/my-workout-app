@@ -129,6 +129,49 @@
                 submitBtn.disabled = false;
             }
         }
+        async function sendData() {
+    const status = document.getElementById('status');
+    const fileInput = document.getElementById('imageInput');
+
+    try {
+        status.innerText = "⌛ กำลังบันทึกข้อมูล...";
+        
+        // อ่านไฟล์รูปภาพ
+        let imageBase64 = null;
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            imageBase64 = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        const profile = await liff.getProfile();
+        const data = {
+            userId: profile.userId,
+            userName: profile.displayName,
+            type: document.getElementById('exerciseType').value,
+            value: document.getElementById('exerciseValue').value,
+            imageFile: imageBase64
+        };
+
+        // --- จุดสำคัญ: คำสั่งส่งข้อมูลไปที่ Google Sheets ---
+        await fetch(scriptUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(data)
+        });
+
+        alert("🎉 บันทึกกิจกรรมสำเร็จแล้วค่ะ!");
+        liff.closeWindow(); 
+
+    } catch (error) {
+        alert("เกิดข้อผิดพลาด: " + error.message);
+        status.innerText = "❌ บันทึกล้มเหลว";
+    }
+}
     </script>
 </body>
 </html>
