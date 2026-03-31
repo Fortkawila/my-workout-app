@@ -41,7 +41,7 @@
 
 <script>
     // --- จุดที่ต้องแก้ 1: วาง Web App URL จาก Google Sheets ---
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwPhBGZ-uX23T_ntWvNODTcV3VYc2H8Ry9K96SBuNp0Dgg9K3Z5xVOKEYtxMGJjUiKwfg/exec"; 
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwqowtpWP-YDr1g70dfno97bpVlDxBEWkTtK5QPe4hR9luP-NKYZD8B8FJ4yW9s0lTxLQ/exec"; 
 
     // --- จุดที่ต้องแก้ 2: วาง LIFF ID ของคุณ ---
     const MY_LIFF_ID = "2009654811-r9KVm9al"; 
@@ -78,18 +78,19 @@
         return resData.data.link;
     }
 
-   async function sendData() {
+async function sendData() {
         const status = document.getElementById('status');
         const fileInput = document.getElementById('imageInput');
         
         try {
             const profile = await liff.getProfile();
-            status.innerText = "กำลังประมวลผล...";
+            status.innerText = "กำลังประมวลผล... โปรดรอสักครู่";
             
             let imageBase64 = null;
             if (fileInput.files.length > 0) {
                 status.innerText = "กำลังเตรียมรูปภาพ...";
                 const file = fileInput.files[0];
+                // แปลงรูปเป็น Base64 เพื่อส่งเข้า Google Drive โดยไม่ต้องผ่าน Imgur
                 imageBase64 = await new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onloadend = () => resolve(reader.result);
@@ -106,16 +107,22 @@
             };
 
             status.innerText = "กำลังบันทึกข้อมูล...";
-            await fetch(WEB_APP_URL, {
+            const response = await fetch(WEB_APP_URL, {
                 method: 'POST',
                 body: JSON.stringify(data)
             });
 
-            status.innerText = "✅ บันทึกสำเร็จ!";
-            setTimeout(() => liff.closeWindow(), 2000);
+            const resData = await response.json();
+            if (resData.result === "success") {
+                status.innerText = "✅ บันทึกสำเร็จ!";
+                setTimeout(() => liff.closeWindow(), 2000);
+            } else {
+                throw new Error(resData.error);
+            }
 
         } catch (err) {
             status.innerText = "❌ ผิดพลาด: " + err;
+            console.error(err);
         }
     }
     main();
